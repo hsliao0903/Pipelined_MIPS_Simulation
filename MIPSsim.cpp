@@ -11,6 +11,8 @@ On my honor, I have neither given nor received unauthorized aid on this assignme
 #include <fstream>
 #include <string>
 #include <map>
+#include <queue>
+#include <set>
 using namespace std;
 
 #define STARTING_ADDRESS 256
@@ -19,12 +21,65 @@ using namespace std;
 #define NO_EXECUTE false
 #define win_endl "\r\n"
 
+/* Pipeline definations */
+#define MAX_FETCH 2  // the maximum number of instructions could be fetched per cycle
+#define PREISSUEQ_SIZE 4
+#define PREALU1Q_SIZE 2
+#define PREALU2Q_SIZE 2
+#define WRITEBACKQ_SIZE 2
+
+enum inst_cat_op_code {
+    eInstCatOne = 1,
+    eInstCatTwo,
+    eInstJ,
+    eInstJR,
+    eInstBEQ,
+    eInstBLTZ,
+    eInstBGTZ,
+    eInstBREAK,
+    eInstSW,
+    eInstLW,
+    eInstSLL,
+    eInstSRL,
+    eInstSRA,
+    eInstNOP,
+    eInstADD,
+    eInstSUB,
+    eInstMUL,
+    eInstAND,
+    eInstOR,
+    eInstXOR,
+    eInstNOR,
+    eInstSLT,
+    eInstADDI,
+    eInstANDI,
+    eInstORI,
+    eInstXORI,
+};
+
 /* function declartions */
 long convert2sComplement (string bin, int bits);
 string disessamblyInst (string inst);
 int executeInst (string inst, int PC);
 void startDisessambly (void);
 void startSimulation ();
+int instHash (string inst, int cat);
+
+/* pipeline use function declartions */
+void startPipelineSimulation (void);
+void outputSimulation (ofstream& outputFILE, int* cycleCounts);
+int getInstCode (string inst);
+bool isBranchInst (string inst);
+bool tryIssueInst (string inst);
+bool isRAW (int reg);
+bool isWAW (int reg);
+bool isWAR (int reg);
+bool isPreIssueRAW (int reg);
+bool isPreIssueWAW (int reg);
+bool isPreIssueWAR (int reg);
+bool checkNonIssuedInst (string inst, bool check);
+bool checkBranchInst (string inst);
+
 
 /* global structures */
 map<int, string> instMap;
@@ -32,6 +87,27 @@ map<int, int> dataMap;
 int regMap[32] = {0};
 int breakAddr = 0;
 string newline = "\n";
+
+// scoreboarding for hazard checks
+set<int> sbRegReading;
+set<int> sbRegWriting;
+set<int> preissueRegRead;  // for the order property in pre-issued queue, (not-issued istructions)
+set<int> preissueRegWrite;
+//IF unit use
+string IFWaitInst = "";
+string IFExecIns = "";
+// Issue unit
+queue<string> preIssueQ; // max size 4
+queue<string> swOrderQ; 
+queue<string> preALU1Q; // max size 2
+queue<string> preALU2Q; // max size 2
+queue<string> writeBackQ; //max size 2
+string preMEMQ = "";
+string postMEMQ = "";
+string postALU2Q = "";
+
+
+
 
 int main (int argc, char* argv[]){
 
@@ -47,7 +123,10 @@ int main (int argc, char* argv[]){
                 line.erase(line.size()-1);
                 newline = win_endl;
             }
-
+            if (line == BREAK_inst){
+                breakAddr = PC;
+                //cout << "[DEBUG] Found BREAK inst at PC=" << PC << endl;
+            }
             instMap[PC] = line;
             PC += 4;
         }
@@ -61,7 +140,10 @@ int main (int argc, char* argv[]){
     startDisessambly();
     
     /* Start output simulation.txt*/
-    startSimulation();
+    //startSimulation();
+
+    /* Start Pipeline Simulation*/
+    startPipelineSimulation();
 
 
     /* [DEBUG] print the instMap */
@@ -73,6 +155,360 @@ int main (int argc, char* argv[]){
     */
     /* end of DEBUG */
     return 0;
+}
+
+void startPipelineSimulation (void){
+    int nextPC = STARTING_ADDRESS;
+    int PC = STARTING_ADDRESS;
+    int cycleCount = 0;
+    // fetch parameters initialize
+    //bool isIFwaiting = false;  //wait for a branch to finish
+    int fetchCount = 0; //at most 2
+    bool isPreIssueQFull = false;
+    bool isPreALU1QFull = false;
+    bool isPreALU2QFull = false;
+    string fetchedInst = "";
+
+    ofstream outputFILE ("simulation.txt");
+    if (!outputFILE.is_open()){
+        cout << "Unable to open " << "simulation.txt" << endl;
+        return;
+    }
+
+    while (nextPC < breakAddr){
+        isPreIssueQFull = false;
+        isPreALU1QFull = false;
+        isPreALU2QFull = false;
+
+
+        /* postALU2 to WB */
+        if (!postALU2Q.empty()){
+            writeBackQ.push(postALU2Q);
+            postALU2Q = "";
+        }
+        
+
+        /* ALU1 UNIT */
+        if (!preALU1Q.empty()){
+            int qSize = preALU1Q.size();
+            if (qSize == PREALU1Q_SIZE)
+                isPreALU1QFull = true;
+            preMEMQ = preALU1Q.front();
+            preALU1Q.pop();
+            
+        }
+
+        /* ALU2 UNIT */
+        if (!preALU2Q.empty()){
+            int qSize = preALU2Q.size();
+            if (qSize == PREALU2Q_SIZE)
+                isPreALU2QFull = true;
+            postALU2Q = preALU2Q.front();
+            preALU2Q.pop();
+        }
+        
+        /* ISSUE UNIT */
+        preissueRegRead.clear();
+        preissueRegWrite.clear();
+        if (!preIssueQ.empty()){
+            // check all the instructions in the queue
+            int qSize = preIssueQ.size();
+            int iterQCount = 0;
+            // at most one inst to ALU1 and one inst to ALU2
+            bool issuedALU1 = false;
+            bool issuedALU2 = false;
+
+            // preissueQ is full last cycle
+            if (qSize == PREISSUEQ_SIZE)
+                isPreIssueQFull = true;
+
+
+            while (iterQCount < qSize){
+                string curInst = preIssueQ.front(); // the instrion dealing with
+                //preIssueQ.pop();
+                
+                if (getInstCode(curInst) == eInstLW){
+                    // for ALU1 LW instructions 
+                    if (swOrderQ.empty() && !issuedALU1 && !isPreALU1QFull && tryIssueInst(curInst)){
+                        // deal with LW instruction //check hazard passed
+                        // check hazard with non-issued instructions
+                        if (checkNonIssuedInst(curInst, true)){
+                            preIssueQ.pop();
+                            preALU1Q.push(curInst);
+                            issuedALU1 = true;
+                        } else {
+                            checkNonIssuedInst(curInst, false);
+                            preIssueQ.push(curInst);
+                            preIssueQ.pop();
+                        }
+                    } else {
+                        checkNonIssuedInst(curInst, false);
+                        preIssueQ.push(curInst);
+                        preIssueQ.pop();
+                    }
+                    
+                } else if (getInstCode(curInst) == eInstSW){
+                    //for ALU1 instructions SW
+                    if (swOrderQ.front() == curInst && !issuedALU1 && !isPreALU1QFull && tryIssueInst(curInst)){
+                        // deal with SW instruction
+                        if (checkNonIssuedInst(curInst, true)){
+                            preIssueQ.pop();
+                            preALU1Q.push(curInst);
+                            swOrderQ.pop();
+                            issuedALU1 = true;
+                        } else {
+                            checkNonIssuedInst(curInst, false);
+                            preIssueQ.push(curInst);
+                            preIssueQ.pop();
+                        }
+                    } else {
+                        checkNonIssuedInst(curInst, false);
+                        preIssueQ.push(curInst);
+                        preIssueQ.pop();
+                    }
+                    
+                } else {
+                    // for ALU2 instructions
+                    if (!issuedALU2 && !isPreALU2QFull && tryIssueInst(curInst)){
+                        // deal with it
+                        if (checkNonIssuedInst(curInst, true)){
+                            preIssueQ.pop();
+                            preALU2Q.push(curInst);
+                            issuedALU2 = true;
+                        } else {
+                            checkNonIssuedInst(curInst, false);
+                            preIssueQ.push(curInst);
+                            preIssueQ.pop();
+                        }
+                    } else {
+                        checkNonIssuedInst(curInst, false);
+                        preIssueQ.push(curInst);
+                        preIssueQ.pop();
+                    }
+                }
+                iterQCount++;
+            }
+        }
+        
+        /* Deal with Branch Exec queue*/
+        if (!IFExecIns.empty()){
+            IFWaitInst = "";
+            IFExecIns = "";
+        }
+
+        /* Deal with Branch Instructions */
+        if (!IFWaitInst.empty()){
+            if (checkBranchInst(IFWaitInst)){
+                IFExecIns = IFWaitInst;
+                IFWaitInst = "lastwaitcycle";
+                nextPC = executeInst(IFExecIns, PC);
+                cout << "[DEBUG] nextPC = " << nextPC << endl; 
+            }
+        }
+
+        /* FETCH UNIT */
+        // 2 conditions, no branch inst waiting , preissue queue is not full, fetch maximum 2 instructions
+        fetchCount = 0;
+        while (IFWaitInst.empty() && fetchCount < MAX_FETCH && !isPreIssueQFull && preIssueQ.size() < PREISSUEQ_SIZE){
+            PC = nextPC;
+            fetchedInst = instMap[PC];
+
+            // fetch a BREAK instruction
+            if (fetchedInst == BREAK_inst){
+                IFExecIns = fetchedInst;
+                IFWaitInst = "";
+                nextPC = breakAddr; // to the end
+                break;
+            }
+
+            // TODO: fetch a NOP instruction
+            if (getInstCode(fetchedInst) == eInstNOP){
+                cout << "get a NOP instruction" << endl;
+                IFExecIns = fetchedInst;
+                IFWaitInst = "";
+                nextPC += 4;
+                fetchCount += 1;
+                continue;
+            }
+
+            // fetch a BRANCH instruction
+            if (isBranchInst(fetchedInst)){
+                
+                //IFWaitInst = fetchedInst;
+                //IFExecIns = "";
+
+                // check if it is a jump immediate instruction
+                if (getInstCode(fetchedInst) == eInstJ){
+                    nextPC = executeInst(fetchedInst, PC);
+                    IFExecIns = fetchedInst;
+                    IFWaitInst = "";
+                    break;
+                } else {
+                    // check if these branches has data hazards, if yes, wait, if no, do as jump does
+                    if (checkBranchInst(fetchedInst)){
+                        nextPC = executeInst(fetchedInst, PC);
+                        IFExecIns = fetchedInst;
+                        IFWaitInst = "";
+                        break;
+                    } else {
+                        IFWaitInst = fetchedInst;
+                        IFExecIns = "";
+                        break;
+                    }
+                }
+
+                //break;
+            }
+
+            // remember the SW instruction order for ISSUE unit use
+            if (getInstCode(fetchedInst) == eInstSW){
+                swOrderQ.push(fetchedInst);
+            }
+
+            preIssueQ.push(fetchedInst);
+            fetchCount += 1;
+            nextPC += 4;
+        }
+        
+        /* Write Back UNIT */
+        while (!writeBackQ.empty()){
+            string curInst = writeBackQ.front();
+            executeInst(curInst, -1);
+            writeBackQ.pop();
+        }
+
+        /* Output simulation.txt here */
+        outputSimulation(outputFILE, &cycleCount);
+        if (cycleCount == 11)
+            break;
+        //cout << cycleCount << endl;
+    }
+    outputFILE.close();
+}
+
+void outputSimulation (ofstream& outputFILE, int* cycleCounts){
+    map<int, int>::iterator it;
+    int i, j;
+    int qSize = 0;
+    queue<string> tmpQ;
+    queue<string> empty;
+
+    *cycleCounts = *cycleCounts + 1;
+
+    outputFILE << "--------------------" << newline;
+    outputFILE << "Cycle " << *cycleCounts << ":" << newline << newline;
+    /* IF Unit */
+    outputFILE << "IF Unit:" << newline;
+    if (IFWaitInst.empty() && IFExecIns.empty()){
+        outputFILE << "\tWaiting Instruction:" << newline;
+        outputFILE << "\tExecuted Instruction:" << newline;
+    } else if (!IFWaitInst.empty() && IFExecIns.empty()){
+        outputFILE << "\tWaiting Instruction: [" << disessamblyInst(IFWaitInst) << "]" << newline;
+        outputFILE << "\tExecuted Instruction:" << newline;
+    } else if (!IFExecIns.empty() && IFWaitInst == "lastwaitcycle"){
+        outputFILE << "\tWaiting Instruction:" << newline;
+        outputFILE << "\tExecuted Instruction:[" << disessamblyInst(IFExecIns) << "]" << newline;
+    }
+    /* Pre-Issue Queue */
+    outputFILE << "Pre-Issue Queue:" << newline;
+    swap(tmpQ, empty);
+    tmpQ = preIssueQ;
+    qSize = tmpQ.size();
+    for (i = 0 ; i < qSize ; i++){
+        outputFILE << "\tEntry " << i << ": [" << disessamblyInst(tmpQ.front()) << "]" << newline;
+        tmpQ.pop();
+    }
+    for (j = i ; j < PREISSUEQ_SIZE ; j++){
+        outputFILE << "\tEntry " << j << ":" << newline;
+    }
+
+    /* Pre-ALU1 Queue */
+    outputFILE << "Pre-ALU1 Queue:" << newline;
+    swap(tmpQ, empty);
+    tmpQ = preALU1Q;
+    qSize = tmpQ.size();
+    for (i = 0 ; i < qSize ; i++){
+        outputFILE << "\tEntry " << i << ": [" << disessamblyInst(tmpQ.front()) << "]" << newline;
+        tmpQ.pop();
+    }
+    for (j = i ; j < PREALU1Q_SIZE ; j++){
+        outputFILE << "\tEntry " << j << ":" << newline;
+    }
+    /* MEM queues */
+    if (!preMEMQ.empty())
+        outputFILE << "Pre-MEM Queue: [" << disessamblyInst(preMEMQ) << "]" << newline;
+    else
+        outputFILE << "Pre-MEM Queue:" << newline;
+    
+    outputFILE << "Post-MEM Queue:" << newline;
+
+    /* Pre-ALU2 Queue */
+    outputFILE << "Pre-ALU2 Queue:" << newline;
+    swap(tmpQ, empty);
+    tmpQ = preALU2Q;
+    qSize = tmpQ.size();
+    for (i = 0 ; i < qSize ; i++){
+        outputFILE << "\tEntry " << i << ": [" << disessamblyInst(tmpQ.front()) << "]" << newline;
+        tmpQ.pop();
+    }
+    for (j = i ; j < PREALU2Q_SIZE ; j++){
+        outputFILE << "\tEntry " << j << ":" << newline;
+    }
+    
+    /* Post-ALU2 Queue */
+    if (!postALU2Q.empty())
+        outputFILE << "Post-ALU2 Queue: [" << disessamblyInst(postALU2Q) << "]" << newline;
+    else
+        outputFILE << "Post-ALU2 Queue:" << newline;
+
+    /* Registers Map*/
+    outputFILE << newline << "Registers";
+    for (int i = 0 ; i < 32 ; i++){
+        if (i % 8 == 0){
+                outputFILE << newline;
+                outputFILE << "R" << setfill('0') << setw(2) << i << ":";
+        }
+        outputFILE << "\t" << regMap[i];
+    }
+    outputFILE << newline;
+
+    /* Data Map */
+    outputFILE << newline <<"Data";
+    int idx = 0;
+    for (it = dataMap.begin() ; it != dataMap.end() ; it++){
+        if (idx % 8 == 0){
+            outputFILE << newline;
+            outputFILE << setfill('0') << setw(3) << it->first << ":";
+        }
+        outputFILE << "\t" << it->second;
+        idx++;
+    }
+    outputFILE << newline;
+
+}
+
+
+int getInstCode (string inst){
+    string instCat = inst.substr(0,2);
+    string instOp = inst.substr(2,4);
+    int instCategory = (instCat.compare("01") == 0) ? eInstCatOne : eInstCatTwo;
+    return instHash(instOp, instCategory);
+}
+
+bool isBranchInst (string inst){
+    int instCode = getInstCode(inst);
+    if (instCode == eInstJ || instCode == eInstJR || instCode == eInstBEQ || instCode == eInstBGTZ || instCode == eInstBLTZ)
+        return true;         
+    else
+        return false;
+}
+
+bool isLWSWInst (string inst){
+    int instCode = getInstCode(inst);
+    if (instCode == eInstLW || instCode == eInstSW)
+        return true;         
+    else
+        return false;
 }
 
 void startSimulation (void){
@@ -167,35 +603,6 @@ long convert2sComplement (string bin, int bits){
     }
     return 0;
 }
-
-enum inst_cat_op_code {
-    eInstCatOne = 1,
-    eInstCatTwo,
-    eInstJ,
-    eInstJR,
-    eInstBEQ,
-    eInstBLTZ,
-    eInstBGTZ,
-    eInstBREAK,
-    eInstSW,
-    eInstLW,
-    eInstSLL,
-    eInstSRL,
-    eInstSRA,
-    eInstNOP,
-    eInstADD,
-    eInstSUB,
-    eInstMUL,
-    eInstAND,
-    eInstOR,
-    eInstXOR,
-    eInstNOR,
-    eInstSLT,
-    eInstADDI,
-    eInstANDI,
-    eInstORI,
-    eInstXORI,
-};
 
 int instHash (string inst, int cat){
     if (!inst.compare("0000"))
@@ -383,13 +790,19 @@ int executeInst (string inst, int PC){
                     break;
                 case eInstSLL:
                     regMap[regOffsetInt(inst, 16, 5)] = regMap[rtI] << regOffsetInt(inst, 21, 5);
+                    sbRegReading.erase(rtI);
+                    sbRegWriting.erase(rdI);
                     break;
                 case eInstSRL:
                     tmp = (unsigned int) regMap[rtI] >> regOffsetInt(inst, 21, 5);
                     regMap[regOffsetInt(inst, 16, 5)] = (int) tmp;
+                    sbRegReading.erase(rtI);
+                    sbRegWriting.erase(rdI);
                     break;
                 case eInstSRA:
                     regMap[regOffsetInt(inst, 16, 5)] = regMap[rtI] >> regOffsetInt(inst, 21, 5);
+                    sbRegReading.erase(rtI);
+                    sbRegWriting.erase(rdI);
                     break;
                 case eInstNOP: /* SLL R0 R0 0*/
                     break;                                                           
@@ -400,47 +813,311 @@ int executeInst (string inst, int PC){
             switch (instHash(instOp, eInstCatTwo)){
                 case eInstADD:
                     regMap[rdI] = regMap[rsI] + regMap[rtI];
+                    sbRegReading.erase(rsI);
+                    sbRegReading.erase(rtI);
+                    sbRegWriting.erase(rdI);
                     break;
                 case eInstSUB:
                     regMap[rdI] = regMap[rsI] - regMap[rtI];
+                    sbRegReading.erase(rsI);
+                    sbRegReading.erase(rtI);
+                    sbRegWriting.erase(rdI);
                     break;
                 case eInstMUL:
                     regMap[rdI] = regMap[rsI] * regMap[rtI];
+                    sbRegReading.erase(rsI);
+                    sbRegReading.erase(rtI);
+                    sbRegWriting.erase(rdI);
                     break;
                 case eInstAND:
                     regMap[rdI] = regMap[rsI] & regMap[rtI];
+                    sbRegReading.erase(rsI);
+                    sbRegReading.erase(rtI);
+                    sbRegWriting.erase(rdI);
                     break;
                 case eInstOR:
                     regMap[rdI] = regMap[rsI] | regMap[rtI];
+                    sbRegReading.erase(rsI);
+                    sbRegReading.erase(rtI);
+                    sbRegWriting.erase(rdI);
                     break;
                 case eInstXOR:
                     regMap[rdI] = regMap[rsI] ^ regMap[rtI];
+                    sbRegReading.erase(rsI);
+                    sbRegReading.erase(rtI);
+                    sbRegWriting.erase(rdI);
                     break;
                 case eInstNOR:
                     regMap[rdI] = ~(regMap[rsI] | regMap[rtI]);
+                    sbRegReading.erase(rsI);
+                    sbRegReading.erase(rtI);
+                    sbRegWriting.erase(rdI);
                     break;
                 case eInstSLT:
                     if (regMap[rsI] < regMap[rtI])
                         regMap[rdI] = 1;
                     else
                         regMap[rdI] = 0;
+                    sbRegReading.erase(rsI);
+                    sbRegReading.erase(rtI);
+                    sbRegWriting.erase(rdI);
                     break;
                 case eInstADDI:
                     regMap[rtI] = regMap[rsI] + convert2sComplement(inst.substr(16), 16);
+                    sbRegReading.erase(rsI);
+                    sbRegWriting.erase(rtI);
                     break;
                 case eInstANDI:
                     regMap[rtI] = regMap[rsI] & addrOffsetInt(inst, 16, 0);
+                    sbRegReading.erase(rsI);
+                    sbRegWriting.erase(rtI);
                     break;
                 case eInstORI:
                     regMap[rtI] = regMap[rsI] | addrOffsetInt(inst, 16, 0);
+                    sbRegReading.erase(rsI);
+                    sbRegWriting.erase(rtI);
                     break;
                 case eInstXORI:
                     regMap[rtI] = regMap[rsI] ^ addrOffsetInt(inst, 16, 0);
+                    sbRegReading.erase(rsI);
+                    sbRegWriting.erase(rtI);
+                    break;
+            }
+            
+        break;
+    }
+    if (ret == PC)
+        return ret + 4;
+    else
+        return ret;
+}
+
+// issue the instrution and check hazards with already issued instructions and do scoreboarding
+bool tryIssueInst (string inst){
+    //bool ret = false;
+    unsigned int tmp;
+    string instCat = inst.substr(0,2);
+    string instOp = inst.substr(2,4);
+    int rsI = regOffsetInt(inst, 6, 5);
+    int rtI = regOffsetInt(inst, 11, 5);  //destination for SW LW
+    int rdI = regOffsetInt(inst, 16, 5);
+
+
+    int category = (instCat.compare("01") == 0) ? eInstCatOne : eInstCatTwo;
+    switch (category){
+        case eInstCatOne: /* Category-1 */
+            switch (instHash(instOp, eInstCatOne)){
+                case eInstSW:
+                    // check RAW/WAW hazard for SW
+                    if (isRAW(rsI) || isRAW(rtI))
+                        return false;
+                    sbRegReading.insert(rsI);
+                    sbRegReading.insert(rtI);
+                    break;
+                case eInstLW:
+                    if (isRAW(rsI) || isWAW(rtI) || isWAR(rtI))
+                        return false;
+                    sbRegReading.insert(rsI);
+                    sbRegWriting.insert(rtI);
+                    break;
+                case eInstSLL:
+                case eInstSRL:
+                case eInstSRA:
+                    if (isRAW(rtI) || isWAW(rdI) || isWAR(rdI))
+                        return false;
+                    sbRegReading.insert(rtI);
+                    sbRegWriting.insert(rdI);
+                    //regMap[regOffsetInt(inst, 16, 5)] = regMap[rtI] << regOffsetInt(inst, 21, 5);
+                    break;                                                    
+            }
+        break;
+        
+        case eInstCatTwo:
+            switch (instHash(instOp, eInstCatTwo)){
+                case eInstADD:
+                case eInstSUB:
+                case eInstMUL:
+                case eInstAND:
+                case eInstOR:
+                case eInstXOR:
+                case eInstNOR:
+                case eInstSLT:
+                    // RAW for source, WAW, WAR for destination
+                    if (isRAW(rsI) || isRAW(rtI) || isWAW(rdI) || isWAR(rdI))
+                        return false;
+                    sbRegReading.insert(rsI);
+                    sbRegReading.insert(rtI);
+                    sbRegWriting.insert(rdI);
+                    //regMap[rdI] = regMap[rsI] + regMap[rtI];
+                    break;
+
+                case eInstADDI:
+                case eInstANDI:
+                case eInstORI:
+                case eInstXORI:
+                    if (isRAW(rsI) || isWAW(rtI) || isWAR(rtI))
+                        return false;
+                    sbRegReading.insert(rsI);
+                    sbRegWriting.insert(rtI);
+                    //regMap[rtI] = regMap[rsI] + convert2sComplement(inst.substr(16), 16);
                     break;
             }
             
         break;
     }
 
-    return ret;
+    return true;
+}
+
+
+bool isRAW (int reg){
+    if (sbRegWriting.count(reg) == 1)
+        return true;
+    else
+        return false;
+}
+bool isWAW (int reg){
+    if (sbRegWriting.count(reg) == 1)
+        return true;
+    else
+        return false;
+}
+bool isWAR (int reg){
+    if (sbRegReading.count(reg) == 1)
+        return true;
+    else
+        return false;
+}
+
+bool isPreIssueRAW (int reg){
+    if (preissueRegWrite.count(reg) == 1)
+        return true;
+    else
+        return false;
+}
+bool isPreIssueWAW (int reg){
+    if (preissueRegWrite.count(reg) == 1)
+        return true;
+    else
+        return false;
+}
+bool isPreIssueWAR (int reg){
+    if (preissueRegRead.count(reg) == 1)
+        return true;
+    else
+        return false;
+}
+
+bool checkNonIssuedInst (string inst, bool check){
+    //bool ret = false;
+    unsigned int tmp;
+    string instCat = inst.substr(0,2);
+    string instOp = inst.substr(2,4);
+    int rsI = regOffsetInt(inst, 6, 5);
+    int rtI = regOffsetInt(inst, 11, 5);  //destination for SW LW
+    int rdI = regOffsetInt(inst, 16, 5);
+
+    int category = (instCat.compare("01") == 0) ? eInstCatOne : eInstCatTwo;
+    switch (category){
+        case eInstCatOne: /* Category-1 */
+            switch (instHash(instOp, eInstCatOne)){
+                case eInstSW:
+                    if (check){
+                        if (isPreIssueRAW(rsI) || isPreIssueRAW(rtI))
+                            return false;
+                    } else {
+                        preissueRegRead.insert(rsI);
+                        preissueRegRead.insert(rtI);
+                    }
+                    break;
+                case eInstLW:
+                    if (check){
+                        if (isPreIssueRAW(rsI) || isPreIssueWAW(rtI) || isPreIssueWAR(rtI))
+                            return false;
+                    } else {
+                        preissueRegRead.insert(rsI);
+                        preissueRegWrite.insert(rtI);
+                    }
+                    break;
+                case eInstSLL:
+                case eInstSRL:
+                case eInstSRA:
+                    if (check){
+                        if (isPreIssueRAW(rtI) || isPreIssueWAW(rdI) || isPreIssueWAR(rdI))
+                            return false;
+                    } else {
+                        preissueRegRead.insert(rtI);
+                        preissueRegWrite.insert(rdI);
+                    }
+                    break;                                                 
+            }
+        break;
+        
+        case eInstCatTwo:
+            switch (instHash(instOp, eInstCatTwo)){
+                case eInstADD:
+                case eInstSUB:
+                case eInstMUL:
+                case eInstAND:
+                case eInstOR:
+                case eInstXOR:
+                case eInstNOR:
+                case eInstSLT:
+                    if (check){
+                        if (isPreIssueRAW(rsI) || isPreIssueRAW(rtI) || isPreIssueWAW(rdI) || isPreIssueWAR(rdI))
+                            return false;
+                    } else {
+                        preissueRegRead.insert(rsI);
+                        preissueRegRead.insert(rtI);
+                        preissueRegWrite.insert(rdI);
+                    }   
+                    break;
+                
+                case eInstADDI:
+                case eInstANDI:
+                case eInstORI:
+                case eInstXORI:
+                    if (check){
+                        if (isPreIssueRAW(rsI) || isPreIssueWAW(rtI) || isPreIssueWAR(rtI))
+                            return false;
+                    } else {
+                        preissueRegRead.insert(rsI);
+                        preissueRegWrite.insert(rtI);
+                    }
+                    break;
+            }
+        break;
+    }
+    return true;
+}
+
+bool checkBranchInst (string inst){
+    //unsigned int tmp;
+    string instCat = inst.substr(0,2);
+    string instOp = inst.substr(2,4);
+    int rsI = regOffsetInt(inst, 6, 5);
+    int rtI = regOffsetInt(inst, 11, 5);  //destination for SW LW
+    int rdI = regOffsetInt(inst, 16, 5);
+    int category = (instCat.compare("01") == 0) ? eInstCatOne : eInstCatTwo;
+    switch (category){
+        case eInstCatOne: /* Category-1 */
+            switch (instHash(instOp, eInstCatOne)){
+                case eInstJR:
+                case eInstBLTZ:
+                case eInstBGTZ:
+                    if (isRAW(rsI) || isPreIssueRAW(rsI))
+                        return false;
+                    //ret= regMap[rsI];
+                    break;
+                case eInstBEQ:
+                    if (isRAW(rsI) || isPreIssueRAW(rsI) || isRAW(rtI) || isPreIssueRAW(rtI))
+                        return false;
+                    //if (regMap[rsI] == regMap[rtI])
+                    //    ret = PC + 4 + addrOffsetInt(inst, 16, 2);
+                    break;                                       
+            }
+        break;
+        
+    }
+    return true;
 }
