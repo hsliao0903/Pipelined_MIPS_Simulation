@@ -77,7 +77,8 @@ bool isWAR (int reg);
 bool isPreIssueRAW (int reg);
 bool isPreIssueWAW (int reg);
 bool isPreIssueWAR (int reg);
-bool checkNonIssuedInst (string inst, bool check);
+//bool checkNonIssuedInst (string inst, bool check);
+bool checkNonIssuedInst (string inst, bool check, bool sameCycleIssueInsCheck);
 bool checkBranchInst (string inst);
 
 
@@ -176,8 +177,12 @@ void startPipelineSimulation (void){
         return;
     }
 
-    while (nextPC < breakAddr){
+    while (nextPC <= breakAddr + 4){
         cycleCount += 1;
+
+        if (nextPC == breakAddr + 4)
+            break;
+
         isPreIssueQFull = false;
         isPreALU1QFull = false;
         isPreALU2QFull = false;
@@ -255,24 +260,24 @@ void startPipelineSimulation (void){
             while (iterQCount < qSize){
                 string curInst = preIssueQ.front(); // the instrion dealing with
                 //preIssueQ.pop();
-                
+                int instIssued = issuedALU1 || issuedALU2;
                 if (getInstCode(curInst) == eInstLW){
                     // for ALU1 LW instructions 
-                    if (iterQCount < swPreIssueOrder && !issuedALU1 && !isPreALU1QFull && checkNonIssuedInst(curInst, true)){
+                    if (iterQCount < swPreIssueOrder && !issuedALU1 && !isPreALU1QFull && checkNonIssuedInst(curInst, true, instIssued)){
                         // deal with LW instruction //check hazard passed
                         // check hazard with non-issued instructions
                         if (tryIssueInst(curInst)){
-                            checkNonIssuedInst(curInst, false);
+                            checkNonIssuedInst(curInst, false, false);
                             preIssueQ.pop();
                             preALU1Q.push(curInst);
                             issuedALU1 = true;
                         } else {
-                            checkNonIssuedInst(curInst, false);
+                            checkNonIssuedInst(curInst, false, false);
                             preIssueQ.push(curInst);
                             preIssueQ.pop();
                         }
                     } else {
-                        checkNonIssuedInst(curInst, false);
+                        checkNonIssuedInst(curInst, false, false);
                         preIssueQ.push(curInst);
                         preIssueQ.pop();
                     }
@@ -284,41 +289,41 @@ void startPipelineSimulation (void){
                         swPreIssueOrder = iterQCount;
                     }
                     //for ALU1 instructions SW
-                    if (!issuedALU1 && !isPreALU1QFull && checkNonIssuedInst(curInst, true)){
+                    if (!issuedALU1 && !isPreALU1QFull && checkNonIssuedInst(curInst, true, instIssued)){
                         // deal with SW instruction
                         if (tryIssueInst(curInst)){
-                            checkNonIssuedInst(curInst, false);
+                            checkNonIssuedInst(curInst, false, false);
                             preIssueQ.pop();
                             preALU1Q.push(curInst);
                             //swOrderQ.pop();
                             issuedALU1 = true;
                         } else {
-                            checkNonIssuedInst(curInst, false);
+                            checkNonIssuedInst(curInst, false, false);
                             preIssueQ.push(curInst);
                             preIssueQ.pop();
                         }
                     } else {
-                        checkNonIssuedInst(curInst, false);
+                        checkNonIssuedInst(curInst, false, false);
                         preIssueQ.push(curInst);
                         preIssueQ.pop();
                     }
                     
                 } else {
                     // for ALU2 instructions
-                    if (!issuedALU2 && !isPreALU2QFull && checkNonIssuedInst(curInst, true)){
+                    if (!issuedALU2 && !isPreALU2QFull && checkNonIssuedInst(curInst, true, instIssued)){
                         // deal with it
                         if (tryIssueInst(curInst)){
-                            checkNonIssuedInst(curInst, false);
+                            checkNonIssuedInst(curInst, false, false);
                             preIssueQ.pop();
                             preALU2Q.push(curInst);
                             issuedALU2 = true;
                         } else {
-                            checkNonIssuedInst(curInst, false);
+                            checkNonIssuedInst(curInst, false, false);
                             preIssueQ.push(curInst);
                             preIssueQ.pop();
                         }
                     } else {
-                        checkNonIssuedInst(curInst, false);
+                        checkNonIssuedInst(curInst, false, false);
                         preIssueQ.push(curInst);
                         preIssueQ.pop();
                     }
@@ -354,7 +359,9 @@ void startPipelineSimulation (void){
             if (fetchedInst == BREAK_inst){
                 IFExecIns = fetchedInst;
                 IFWaitInst = "";
-                nextPC = breakAddr; // to the end
+                nextPC = breakAddr + 4; // to the end
+                cout << "get a BREAK bransh, Cycle: " << cycleCount << " fetchcount: " << fetchCount << endl;
+                cout << "nextPC: " << nextPC << endl;
                 break;
             }
 
@@ -376,9 +383,8 @@ void startPipelineSimulation (void){
 
                 // check if it is a jump immediate instruction
                 if (getInstCode(fetchedInst) == eInstJ){
-                    cout << "get a jump bransch Cycle: " << cycleCount << " fetchcount: " << fetchCount << endl;
+                    
                     nextPC = executeInst(fetchedInst, PC);
-                    cout << "nextPC: " << nextPC << endl;
                     IFExecIns = fetchedInst;
                     IFWaitInst = "";
                     break;
@@ -418,10 +424,11 @@ void startPipelineSimulation (void){
 
         /* Output simulation.txt here */
         outputSimulation(outputFILE, &cycleCount);
-        if (cycleCount == 20)
-            break;
+        //if (cycleCount == 29)
+        //    break;
         //cout << cycleCount << endl;
     }
+    
     outputFILE.close();
 }
 
@@ -1085,6 +1092,7 @@ bool checkNonIssuedInst (string inst, bool check, bool sameCycleIssueInsCheck){
             switch (instHash(instOp, eInstCatOne)){
                 case eInstSW:
                     if (check){
+                        // if it is the second instruction in the same cycle going to be issued, don't check RAW hazard
                         if (sameCycleIssueInsCheck){
                             return true;
                         } else {
@@ -1098,8 +1106,13 @@ bool checkNonIssuedInst (string inst, bool check, bool sameCycleIssueInsCheck){
                     break;
                 case eInstLW:
                     if (check){
-                        if (isPreIssueRAW(rsI) || isPreIssueWAW(rtI) || isPreIssueWAR(rtI))
-                            return false;
+                        if (sameCycleIssueInsCheck){
+                            if (isPreIssueWAW(rtI) || isPreIssueWAR(rtI))
+                                return false;
+                        } else {
+                            if (isPreIssueRAW(rsI) || isPreIssueWAW(rtI) || isPreIssueWAR(rtI))
+                                return false;
+                        }
                     } else {
                         preissueRegRead.insert(rsI);
                         preissueRegWrite.insert(rtI);
@@ -1109,8 +1122,13 @@ bool checkNonIssuedInst (string inst, bool check, bool sameCycleIssueInsCheck){
                 case eInstSRL:
                 case eInstSRA:
                     if (check){
-                        if (isPreIssueRAW(rtI) || isPreIssueWAW(rdI) || isPreIssueWAR(rdI))
-                            return false;
+                        if (sameCycleIssueInsCheck){
+                            if (isPreIssueWAW(rdI) || isPreIssueWAR(rdI))
+                                return false;
+                        } else {
+                            if (isPreIssueRAW(rtI) || isPreIssueWAW(rdI) || isPreIssueWAR(rdI))
+                                return false;
+                        }
                     } else {
                         preissueRegRead.insert(rtI);
                         preissueRegWrite.insert(rdI);
@@ -1130,8 +1148,13 @@ bool checkNonIssuedInst (string inst, bool check, bool sameCycleIssueInsCheck){
                 case eInstNOR:
                 case eInstSLT:
                     if (check){
-                        if (isPreIssueRAW(rsI) || isPreIssueRAW(rtI) || isPreIssueWAW(rdI) || isPreIssueWAR(rdI))
-                            return false;
+                        if (sameCycleIssueInsCheck){
+                            if (isPreIssueWAW(rdI) || isPreIssueWAR(rdI))
+                                return false;
+                        } else {
+                            if (isPreIssueRAW(rsI) || isPreIssueRAW(rtI) || isPreIssueWAW(rdI) || isPreIssueWAR(rdI))
+                                return false;
+                        }
                     } else {
                         preissueRegRead.insert(rsI);
                         preissueRegRead.insert(rtI);
@@ -1144,8 +1167,13 @@ bool checkNonIssuedInst (string inst, bool check, bool sameCycleIssueInsCheck){
                 case eInstORI:
                 case eInstXORI:
                     if (check){
-                        if (isPreIssueRAW(rsI) || isPreIssueWAW(rtI) || isPreIssueWAR(rtI))
-                            return false;
+                        if (sameCycleIssueInsCheck){
+                            if (isPreIssueWAW(rtI) || isPreIssueWAR(rtI))
+                                return false;
+                        } else {
+                            if (isPreIssueRAW(rsI) || isPreIssueWAW(rtI) || isPreIssueWAR(rtI))
+                                return false;
+                        }
                     } else {
                         preissueRegRead.insert(rsI);
                         preissueRegWrite.insert(rtI);
