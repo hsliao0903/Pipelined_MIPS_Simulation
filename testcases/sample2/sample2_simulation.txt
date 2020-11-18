@@ -1,0 +1,31 @@
+--------------------
+Cycle 1:
+
+IF Unit:
+	Waiting Instruction:
+	Executed Instruction: [BREAK]
+Pre-Issue Queue:
+	Entry 0:
+	Entry 1:
+	Entry 2:
+	Entry 3:
+Pre-ALU1 Queue:
+	Entry 0:
+	Entry 1:
+Pre-MEM Queue:
+Post-MEM Queue:
+Pre-ALU2 Queue:
+	Entry 0:
+	Entry 1:
+Post-ALU2 Queue:
+
+Registers
+R00:	0	0	0	0	0	0	0	0
+R08:	0	0	0	0	0	0	0	0
+R16:	0	0	0	0	0	0	0	0
+R24:	0	0	0	0	0	0	0	0
+
+Data
+260:	1543503871	1610612735	1677721599	1744830463	1811939327	1879048191	-1006632961	-939524097
+292:	-872415233	-805306369	-738197505	-671088641	-603979777	-536870913	-469762049	-402653185
+324:	-335544321	-268435457	1409286157	-1	2147483647	-2147483647
