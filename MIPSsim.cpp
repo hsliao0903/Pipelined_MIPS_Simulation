@@ -15,6 +15,14 @@ On my honor, I have neither given nor received unauthorized aid on this assignme
 #include <set>
 using namespace std;
 
+/* output file control */
+#define CREATE_DISASSEMBLY_FILE false
+#define CREATE_PROJ1_SIMULATION_FILE false
+#define CREATE_PROJ2_SIMULATION_FILE true
+#define PROJECT1_SIM_FILE_NAME "simulation_proj1.txt"
+#define PROJECT2_SIM_FILE_NAME "simulation.txt"
+
+
 #define STARTING_ADDRESS 256
 #define BREAK_inst "01010100000000000000000000001101"
 #define EXECUTE true
@@ -141,10 +149,12 @@ int main (int argc, char* argv[]){
     startDisassambly();
     
     /* Start output simulation.txt*/
-    //startSimulation();
+    if (CREATE_PROJ1_SIMULATION_FILE)
+        startSimulation();
 
     /* Start Pipeline Simulation*/
-    startPipelineSimulation();
+    if (CREATE_PROJ2_SIMULATION_FILE)
+        startPipelineSimulation();
 
 
     /* [DEBUG] print the instMap */
@@ -172,7 +182,7 @@ void startPipelineSimulation (void){
     string fetchedInst = "";
 
 
-    ofstream outputFILE ("simulation.txt");
+    ofstream outputFILE (PROJECT2_SIM_FILE_NAME);
     if (!outputFILE.is_open()){
         cout << "Unable to open " << "simulation.txt" << endl;
         return;
@@ -341,6 +351,7 @@ void startPipelineSimulation (void){
             }
         }
         
+
         /* Deal with Branch Exec queue*/
         if (!IFExecIns.empty()){
             IFWaitInst = "";
@@ -360,6 +371,8 @@ void startPipelineSimulation (void){
         /* FETCH UNIT */
         // 2 conditions, no branch inst waiting , preissue queue is not full, fetch maximum 2 instructions
         fetchCount = 0;
+        //preissueRegWrite.clear(); // for first fetched instructions
+        //preissueRegRead.clear();
         while (IFWaitInst.empty() && fetchCount < preissueSpaceLeftLastCycle && fetchCount < MAX_FETCH && !isPreIssueQFull && preIssueQ.size() < PREISSUEQ_SIZE){
             PC = nextPC;
             fetchedInst = instMap[PC];
@@ -420,7 +433,7 @@ void startPipelineSimulation (void){
             //if (getInstCode(fetchedInst) == eInstSW){
             //    swOrderQ.push(fetchedInst);
             //}
-
+            checkNonIssuedInst(fetchedInst, false, false);
             preIssueQ.push(fetchedInst);
             fetchCount += 1;
             nextPC += 4;
@@ -435,7 +448,7 @@ void startPipelineSimulation (void){
 
         /* Output simulation.txt here */
         outputSimulation(outputFILE, &cycleCount);
-        //if (cycleCount == 29)
+        //if (cycleCount == 3)
         //    break;
         //cout << cycleCount << endl;
     }
@@ -451,7 +464,7 @@ void outputSimulation (ofstream& outputFILE, int* cycleCounts){
     queue<string> empty;
 
     //*cycleCounts = *cycleCounts + 1;
-
+    
     outputFILE << "--------------------" << newline;
     outputFILE << "Cycle " << *cycleCounts << ":" << newline << newline;
     /* IF Unit */
@@ -581,7 +594,7 @@ void startSimulation (void){
     int PC = STARTING_ADDRESS;
     int nextPC = STARTING_ADDRESS;
     
-    ofstream outputFILE ("simulation.txt");
+    ofstream outputFILE (PROJECT1_SIM_FILE_NAME);
     if (!outputFILE.is_open()){
         cout << "Unable to open " << "disessembly.txt" << endl;
         return;
@@ -626,17 +639,19 @@ void startDisassambly (void){
     int PC = STARTING_ADDRESS, dataVal = 0;
     bool breakFound = false;
     map<int, string>::iterator it;
-
-    ofstream outputFILE ("disassembly.txt");
-    if (!outputFILE.is_open()){
-        cout << "Unable to open " << "disassembly.txt" << endl;
-        return;
-    }
-
+#if CREATE_DISASSEMBLY_FILE
+        ofstream outputFILE ("disassembly.txt");
+        if (!outputFILE.is_open()){
+            cout << "Unable to open " << "disassembly.txt" << endl;
+            return;
+        }
+#endif
     while ((it = instMap.find(PC)) != instMap.end()){
         if (!breakFound){
             //cout << it->second << "\t" << it->first << "\t" << disessamblyInst(it->second) << endl;
-            outputFILE << it->second << "\t" << it->first << "\t" << disessamblyInst(it->second) << newline;
+#if CREATE_DISASSEMBLY_FILE
+                outputFILE << it->second << "\t" << it->first << "\t" << disessamblyInst(it->second) << newline;
+#endif
             if (it->second == BREAK_inst){
                 breakFound = true;
                 breakAddr = it->first;
@@ -647,13 +662,17 @@ void startDisassambly (void){
             //cout << it->second << "\t" << it->first << "\t"<< convert2sComplement(it->second) << endl;
             dataVal = convert2sComplement(it->second, 32);
             dataMap[PC] = dataVal;
-            outputFILE << it->second << "\t" << it->first << "\t"<< dataVal << newline;
+#if CREATE_DISASSEMBLY_FILE
+                outputFILE << it->second << "\t" << it->first << "\t"<< dataVal << newline;
+#endif
             
         }
         //cout << it->second << "\t" << it->first << "\n";
         PC += 4;
     }
-    outputFILE.close();
+#if CREATE_DISASSEMBLY_FILE
+        outputFILE.close();
+#endif
     return;
 }
 
