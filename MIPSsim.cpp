@@ -194,6 +194,7 @@ void startPipelineSimulation (void){
         if (nextPC == breakAddr + 4)
             break;
 
+        /*
         if (getNOPInst){
             IFWaitInst = "";
             IFExecIns = "";
@@ -201,7 +202,8 @@ void startPipelineSimulation (void){
             getNOPInst = false;
             continue;
         }
-
+        */
+       
         isPreIssueQFull = false;
         isPreALU1QFull = false;
         isPreALU2QFull = false;
@@ -388,16 +390,17 @@ void startPipelineSimulation (void){
             }
 
             // TODO: fetch a NOP instruction
+            
             if (getInstCode(fetchedInst) == eInstNOP){
                 //cout << "get a NOP instruction" << endl;
-                IFExecIns = fetchedInst;
-                IFWaitInst = "";
+                //IFExecIns = fetchedInst;
+                //IFWaitInst = "";
                 nextPC += 4;
-                getNOPInst = true;
-                //fetchCount += 1;
+                //getNOPInst = true;
+                fetchCount += 1;
                 continue;
             }
-
+            
             // fetch a BRANCH instruction
             if (isBranchInst(fetchedInst)){
                 
