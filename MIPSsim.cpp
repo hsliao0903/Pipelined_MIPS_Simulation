@@ -61,7 +61,7 @@ enum inst_cat_op_code {
 long convert2sComplement (string bin, int bits);
 string disessamblyInst (string inst);
 int executeInst (string inst, int PC);
-void startDisessambly (void);
+void startDisassambly (void);
 void startSimulation ();
 int instHash (string inst, int cat);
 
@@ -138,7 +138,7 @@ int main (int argc, char* argv[]){
     }
 
     /* Start output disassembly.txt */
-    startDisessambly();
+    startDisassambly();
     
     /* Start output simulation.txt*/
     //startSimulation();
@@ -168,6 +168,7 @@ void startPipelineSimulation (void){
     bool isPreIssueQFull = false;
     bool isPreALU1QFull = false;
     bool isPreALU2QFull = false;
+    bool getNOPInst = false;
     string fetchedInst = "";
 
 
@@ -182,6 +183,14 @@ void startPipelineSimulation (void){
 
         if (nextPC == breakAddr + 4)
             break;
+
+        if (getNOPInst){
+            IFWaitInst = "";
+            IFExecIns = "";
+            outputSimulation(outputFILE, &cycleCount);
+            getNOPInst = false;
+            continue;
+        }
 
         isPreIssueQFull = false;
         isPreALU1QFull = false;
@@ -205,7 +214,7 @@ void startPipelineSimulation (void){
                 preMEMQ = "";
             } else {
                 cout << "[ERROR] something wrong with PRE-MEM queue" << newline;
-                break;
+                //break;
             }
             
         }
@@ -344,7 +353,7 @@ void startPipelineSimulation (void){
                 IFExecIns = IFWaitInst;
                 IFWaitInst = "lastwaitcycle";
                 nextPC = executeInst(IFExecIns, PC);
-                cout << "[DEBUG] nextPC = " << nextPC << endl; 
+                //cout << "[DEBUG] nextPC = " << nextPC << endl; 
             }
         }
 
@@ -360,18 +369,19 @@ void startPipelineSimulation (void){
                 IFExecIns = fetchedInst;
                 IFWaitInst = "";
                 nextPC = breakAddr + 4; // to the end
-                cout << "get a BREAK bransh, Cycle: " << cycleCount << " fetchcount: " << fetchCount << endl;
-                cout << "nextPC: " << nextPC << endl;
+                //cout << "get a BREAK bransh, Cycle: " << cycleCount << " fetchcount: " << fetchCount << endl;
+                //cout << "nextPC: " << nextPC << endl;
                 break;
             }
 
             // TODO: fetch a NOP instruction
             if (getInstCode(fetchedInst) == eInstNOP){
-                cout << "get a NOP instruction" << endl;
+                //cout << "get a NOP instruction" << endl;
                 IFExecIns = fetchedInst;
                 IFWaitInst = "";
                 nextPC += 4;
-                fetchCount += 1;
+                getNOPInst = true;
+                //fetchCount += 1;
                 continue;
             }
 
@@ -387,6 +397,7 @@ void startPipelineSimulation (void){
                     nextPC = executeInst(fetchedInst, PC);
                     IFExecIns = fetchedInst;
                     IFWaitInst = "";
+                    //cout << "[DEBUG] fetch JUMP: " << cycleCount << endl;
                     break;
                 } else {
                     // check if these branches has data hazards, if yes, wait, if no, do as jump does
@@ -611,14 +622,14 @@ void startSimulation (void){
     return;
 }
 
-void startDisessambly (void){
+void startDisassambly (void){
     int PC = STARTING_ADDRESS, dataVal = 0;
     bool breakFound = false;
     map<int, string>::iterator it;
 
-    ofstream outputFILE ("disessembly.txt");
+    ofstream outputFILE ("disassembly.txt");
     if (!outputFILE.is_open()){
-        cout << "Unable to open " << "disessembly.txt" << endl;
+        cout << "Unable to open " << "disassembly.txt" << endl;
         return;
     }
 
@@ -850,9 +861,6 @@ int executeInst (string inst, int PC){
                     regMap[regOffsetInt(inst, 16, 5)] = regMap[rtI] << regOffsetInt(inst, 21, 5);
                     sbRegReading.erase(rtI);
                     sbRegWriting.erase(rdI);
-                    if (sbRegWriting.count(16))
-                        cout << "16 exist in set" << endl;
-                    cout << "[executeINst] SSLrtI: " << rtI << " rdI: " << rdI << endl;
                     break;
                 case eInstSRL:
                     tmp = (unsigned int) regMap[rtI] >> regOffsetInt(inst, 21, 5);
@@ -1052,10 +1060,12 @@ bool isWAW (int reg){
 bool isWAR (int reg){
     // dont check WAR for already issued instructions
     return false;
+    /*
     if (sbRegReading.count(reg) == 1)
         return true;
     else
         return false;
+    */
 }
 
 bool isPreIssueRAW (int reg){
