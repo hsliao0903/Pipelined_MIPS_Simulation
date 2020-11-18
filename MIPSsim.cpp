@@ -98,7 +98,7 @@ string IFWaitInst = "";
 string IFExecIns = "";
 // Issue unit
 queue<string> preIssueQ; // max size 4
-queue<string> swOrderQ; 
+//queue<string> swOrderQ; 
 queue<string> preALU1Q; // max size 2
 queue<string> preALU2Q; // max size 2
 queue<string> writeBackQ; //max size 2
@@ -169,6 +169,7 @@ void startPipelineSimulation (void){
     bool isPreALU2QFull = false;
     string fetchedInst = "";
 
+
     ofstream outputFILE ("simulation.txt");
     if (!outputFILE.is_open()){
         cout << "Unable to open " << "simulation.txt" << endl;
@@ -176,10 +177,33 @@ void startPipelineSimulation (void){
     }
 
     while (nextPC < breakAddr){
+        cycleCount += 1;
         isPreIssueQFull = false;
         isPreALU1QFull = false;
         isPreALU2QFull = false;
 
+        /* POSTMEM queue to write back */
+        if (!postMEMQ.empty()){
+            writeBackQ.push(postMEMQ);
+            postMEMQ = "";
+        }
+
+        /* MEM UNIT */
+        if (!preMEMQ.empty()){
+                // for LW
+            if (getInstCode(preMEMQ) == eInstLW){
+                postMEMQ = preMEMQ;
+                preMEMQ = "";
+            } else if (getInstCode(preMEMQ) == eInstSW){
+                // for SW
+                writeBackQ.push(preMEMQ);
+                preMEMQ = "";
+            } else {
+                cout << "[ERROR] something wrong with PRE-MEM queue" << newline;
+                break;
+            }
+            
+        }
 
         /* postALU2 to WB */
         if (!postALU2Q.empty()){
@@ -210,6 +234,7 @@ void startPipelineSimulation (void){
         /* ISSUE UNIT */
         preissueRegRead.clear();
         preissueRegWrite.clear();
+        int preissueSpaceLeftLastCycle = PREISSUEQ_SIZE;
         if (!preIssueQ.empty()){
             // check all the instructions in the queue
             int qSize = preIssueQ.size();
@@ -217,10 +242,14 @@ void startPipelineSimulation (void){
             // at most one inst to ALU1 and one inst to ALU2
             bool issuedALU1 = false;
             bool issuedALU2 = false;
-
+            bool swFound = false;
+            int swPreIssueOrder = PREISSUEQ_SIZE + 1;
             // preissueQ is full last cycle
             if (qSize == PREISSUEQ_SIZE)
                 isPreIssueQFull = true;
+            else
+                preissueSpaceLeftLastCycle = PREISSUEQ_SIZE - qSize;
+            
 
 
             while (iterQCount < qSize){
@@ -229,10 +258,11 @@ void startPipelineSimulation (void){
                 
                 if (getInstCode(curInst) == eInstLW){
                     // for ALU1 LW instructions 
-                    if (swOrderQ.empty() && !issuedALU1 && !isPreALU1QFull && tryIssueInst(curInst)){
+                    if (iterQCount < swPreIssueOrder && !issuedALU1 && !isPreALU1QFull && checkNonIssuedInst(curInst, true)){
                         // deal with LW instruction //check hazard passed
                         // check hazard with non-issued instructions
-                        if (checkNonIssuedInst(curInst, true)){
+                        if (tryIssueInst(curInst)){
+                            checkNonIssuedInst(curInst, false);
                             preIssueQ.pop();
                             preALU1Q.push(curInst);
                             issuedALU1 = true;
@@ -248,13 +278,19 @@ void startPipelineSimulation (void){
                     }
                     
                 } else if (getInstCode(curInst) == eInstSW){
+                    // remember the first SW instruction's order in pre-issue queue
+                    if (!swFound){
+                        swFound = true;
+                        swPreIssueOrder = iterQCount;
+                    }
                     //for ALU1 instructions SW
-                    if (swOrderQ.front() == curInst && !issuedALU1 && !isPreALU1QFull && tryIssueInst(curInst)){
+                    if (!issuedALU1 && !isPreALU1QFull && checkNonIssuedInst(curInst, true)){
                         // deal with SW instruction
-                        if (checkNonIssuedInst(curInst, true)){
+                        if (tryIssueInst(curInst)){
+                            checkNonIssuedInst(curInst, false);
                             preIssueQ.pop();
                             preALU1Q.push(curInst);
-                            swOrderQ.pop();
+                            //swOrderQ.pop();
                             issuedALU1 = true;
                         } else {
                             checkNonIssuedInst(curInst, false);
@@ -269,9 +305,10 @@ void startPipelineSimulation (void){
                     
                 } else {
                     // for ALU2 instructions
-                    if (!issuedALU2 && !isPreALU2QFull && tryIssueInst(curInst)){
+                    if (!issuedALU2 && !isPreALU2QFull && checkNonIssuedInst(curInst, true)){
                         // deal with it
-                        if (checkNonIssuedInst(curInst, true)){
+                        if (tryIssueInst(curInst)){
+                            checkNonIssuedInst(curInst, false);
                             preIssueQ.pop();
                             preALU2Q.push(curInst);
                             issuedALU2 = true;
@@ -309,7 +346,7 @@ void startPipelineSimulation (void){
         /* FETCH UNIT */
         // 2 conditions, no branch inst waiting , preissue queue is not full, fetch maximum 2 instructions
         fetchCount = 0;
-        while (IFWaitInst.empty() && fetchCount < MAX_FETCH && !isPreIssueQFull && preIssueQ.size() < PREISSUEQ_SIZE){
+        while (IFWaitInst.empty() && fetchCount < preissueSpaceLeftLastCycle && fetchCount < MAX_FETCH && !isPreIssueQFull && preIssueQ.size() < PREISSUEQ_SIZE){
             PC = nextPC;
             fetchedInst = instMap[PC];
 
@@ -339,7 +376,9 @@ void startPipelineSimulation (void){
 
                 // check if it is a jump immediate instruction
                 if (getInstCode(fetchedInst) == eInstJ){
+                    cout << "get a jump bransch Cycle: " << cycleCount << " fetchcount: " << fetchCount << endl;
                     nextPC = executeInst(fetchedInst, PC);
+                    cout << "nextPC: " << nextPC << endl;
                     IFExecIns = fetchedInst;
                     IFWaitInst = "";
                     break;
@@ -361,9 +400,9 @@ void startPipelineSimulation (void){
             }
 
             // remember the SW instruction order for ISSUE unit use
-            if (getInstCode(fetchedInst) == eInstSW){
-                swOrderQ.push(fetchedInst);
-            }
+            //if (getInstCode(fetchedInst) == eInstSW){
+            //    swOrderQ.push(fetchedInst);
+            //}
 
             preIssueQ.push(fetchedInst);
             fetchCount += 1;
@@ -379,7 +418,7 @@ void startPipelineSimulation (void){
 
         /* Output simulation.txt here */
         outputSimulation(outputFILE, &cycleCount);
-        if (cycleCount == 11)
+        if (cycleCount == 20)
             break;
         //cout << cycleCount << endl;
     }
@@ -393,7 +432,7 @@ void outputSimulation (ofstream& outputFILE, int* cycleCounts){
     queue<string> tmpQ;
     queue<string> empty;
 
-    *cycleCounts = *cycleCounts + 1;
+    //*cycleCounts = *cycleCounts + 1;
 
     outputFILE << "--------------------" << newline;
     outputFILE << "Cycle " << *cycleCounts << ":" << newline << newline;
@@ -407,7 +446,11 @@ void outputSimulation (ofstream& outputFILE, int* cycleCounts){
         outputFILE << "\tExecuted Instruction:" << newline;
     } else if (!IFExecIns.empty() && IFWaitInst == "lastwaitcycle"){
         outputFILE << "\tWaiting Instruction:" << newline;
-        outputFILE << "\tExecuted Instruction:[" << disessamblyInst(IFExecIns) << "]" << newline;
+        outputFILE << "\tExecuted Instruction: [" << disessamblyInst(IFExecIns) << "]" << newline;
+        IFWaitInst = "";
+    } else if (!IFExecIns.empty() && IFWaitInst.empty()){
+        outputFILE << "\tWaiting Instruction:" << newline;
+        outputFILE << "\tExecuted Instruction: [" << disessamblyInst(IFExecIns) << "]" << newline;
     }
     /* Pre-Issue Queue */
     outputFILE << "Pre-Issue Queue:" << newline;
@@ -434,13 +477,17 @@ void outputSimulation (ofstream& outputFILE, int* cycleCounts){
     for (j = i ; j < PREALU1Q_SIZE ; j++){
         outputFILE << "\tEntry " << j << ":" << newline;
     }
-    /* MEM queues */
+    /* pre MEM queue */
     if (!preMEMQ.empty())
         outputFILE << "Pre-MEM Queue: [" << disessamblyInst(preMEMQ) << "]" << newline;
     else
         outputFILE << "Pre-MEM Queue:" << newline;
-    
-    outputFILE << "Post-MEM Queue:" << newline;
+
+    /* pre MEM queue */
+    if (!postMEMQ.empty())
+        outputFILE << "Post-MEM Queue: [" << disessamblyInst(postMEMQ) << "]" << newline;
+    else
+        outputFILE << "Post-MEM Queue:" << newline;
 
     /* Pre-ALU2 Queue */
     outputFILE << "Pre-ALU2 Queue:" << newline;
@@ -784,14 +831,21 @@ int executeInst (string inst, int PC){
                     break;
                 case eInstSW:
                     dataMap[regMap[rsI] + addrOffsetInt(inst, 16, 0)] = regMap[rtI];
+                    sbRegReading.erase(rsI);
+                    sbRegReading.erase(rtI);
                     break;
                 case eInstLW:
                     regMap[rtI] = dataMap[regMap[rsI] + addrOffsetInt(inst, 16, 0)];
+                    sbRegReading.erase(rsI);
+                    sbRegWriting.erase(rtI);
                     break;
                 case eInstSLL:
                     regMap[regOffsetInt(inst, 16, 5)] = regMap[rtI] << regOffsetInt(inst, 21, 5);
                     sbRegReading.erase(rtI);
                     sbRegWriting.erase(rdI);
+                    if (sbRegWriting.count(16))
+                        cout << "16 exist in set" << endl;
+                    cout << "[executeINst] SSLrtI: " << rtI << " rdI: " << rdI << endl;
                     break;
                 case eInstSRL:
                     tmp = (unsigned int) regMap[rtI] >> regOffsetInt(inst, 21, 5);
@@ -915,10 +969,13 @@ bool tryIssueInst (string inst){
                     sbRegReading.insert(rtI);
                     break;
                 case eInstLW:
+                    //cout << "[tryIssueInst] LW rsI: " << rsI << " rtI: " << rtI << endl;
+                    
                     if (isRAW(rsI) || isWAW(rtI) || isWAR(rtI))
                         return false;
                     sbRegReading.insert(rsI);
                     sbRegWriting.insert(rtI);
+                    
                     break;
                 case eInstSLL:
                 case eInstSRL:
@@ -927,6 +984,7 @@ bool tryIssueInst (string inst){
                         return false;
                     sbRegReading.insert(rtI);
                     sbRegWriting.insert(rdI);
+                    //cout << "[tryIssueInst] SSLrtI: " << rtI << " rdI: " << rdI << endl;
                     //regMap[regOffsetInt(inst, 16, 5)] = regMap[rtI] << regOffsetInt(inst, 21, 5);
                     break;                                                    
             }
@@ -943,6 +1001,8 @@ bool tryIssueInst (string inst){
                 case eInstNOR:
                 case eInstSLT:
                     // RAW for source, WAW, WAR for destination
+                    //cout << "[tryIssueInst] ADD rsI: " << rsI << " rtI: " << rtI << " rdI: " << rdI << newline;
+                    //cout << "1. " << isRAW(rsI) << " 2. " << isRAW(rtI) << " 3. " << isWAW(rdI) << " 3. " << isWAR(rdI) << endl;
                     if (isRAW(rsI) || isRAW(rtI) || isWAW(rdI) || isWAR(rdI))
                         return false;
                     sbRegReading.insert(rsI);
@@ -983,6 +1043,8 @@ bool isWAW (int reg){
         return false;
 }
 bool isWAR (int reg){
+    // dont check WAR for already issued instructions
+    return false;
     if (sbRegReading.count(reg) == 1)
         return true;
     else
@@ -1008,7 +1070,7 @@ bool isPreIssueWAR (int reg){
         return false;
 }
 
-bool checkNonIssuedInst (string inst, bool check){
+bool checkNonIssuedInst (string inst, bool check, bool sameCycleIssueInsCheck){
     //bool ret = false;
     unsigned int tmp;
     string instCat = inst.substr(0,2);
@@ -1023,8 +1085,12 @@ bool checkNonIssuedInst (string inst, bool check){
             switch (instHash(instOp, eInstCatOne)){
                 case eInstSW:
                     if (check){
-                        if (isPreIssueRAW(rsI) || isPreIssueRAW(rtI))
-                            return false;
+                        if (sameCycleIssueInsCheck){
+                            return true;
+                        } else {
+                            if (isPreIssueRAW(rsI) || isPreIssueRAW(rtI))
+                                return false;
+                        }
                     } else {
                         preissueRegRead.insert(rsI);
                         preissueRegRead.insert(rtI);
