@@ -2638,12 +2638,12 @@ Cycle 86:
 
 IF Unit:
 	Waiting Instruction:
-	Executed Instruction: [NOP]
+	Executed Instruction:
 Pre-Issue Queue:
 	Entry 0: [XORI R31, R0, #32769]
 	Entry 1: [XORI R31, R1, #2]
 	Entry 2: [XORI R31, R8, #4]
-	Entry 3: [SRL R31, R1, #2]
+	Entry 3:
 Pre-ALU1 Queue:
 	Entry 0:
 	Entry 1:
@@ -2683,13 +2683,13 @@ Post-MEM Queue:
 Pre-ALU2 Queue:
 	Entry 0:
 	Entry 1:
-Post-ALU2 Queue: [ORI R31, R8, #4]
+Post-ALU2 Queue:
 
 Registers
 R00:	4	-3	0	4	0	0	0	0
 R08:	1	4	0	0	0	0	0	0
 R16:	0	0	0	0	0	0	0	0
-R24:	0	0	0	0	0	0	0	-1
+R24:	0	0	0	0	0	0	0	5
 
 Data
 452:	-1	-2	-3	1	2	4	-4	10
@@ -2702,17 +2702,17 @@ IF Unit:
 	Waiting Instruction:
 	Executed Instruction:
 Pre-Issue Queue:
-	Entry 0: [XORI R31, R0, #32769]
-	Entry 1: [XORI R31, R1, #2]
-	Entry 2: [XORI R31, R8, #4]
-	Entry 3: [SRL R31, R1, #2]
+	Entry 0: [XORI R31, R1, #2]
+	Entry 1: [XORI R31, R8, #4]
+	Entry 2: [SRL R31, R1, #2]
+	Entry 3:
 Pre-ALU1 Queue:
 	Entry 0:
 	Entry 1:
 Pre-MEM Queue:
 Post-MEM Queue:
 Pre-ALU2 Queue:
-	Entry 0:
+	Entry 0: [XORI R31, R0, #32769]
 	Entry 1:
 Post-ALU2 Queue:
 
@@ -2736,16 +2736,16 @@ Pre-Issue Queue:
 	Entry 0: [XORI R31, R1, #2]
 	Entry 1: [XORI R31, R8, #4]
 	Entry 2: [SRL R31, R1, #2]
-	Entry 3:
+	Entry 3: [SRL R31, R2, #3]
 Pre-ALU1 Queue:
 	Entry 0:
 	Entry 1:
 Pre-MEM Queue:
 Post-MEM Queue:
 Pre-ALU2 Queue:
-	Entry 0: [XORI R31, R0, #32769]
+	Entry 0:
 	Entry 1:
-Post-ALU2 Queue:
+Post-ALU2 Queue: [XORI R31, R0, #32769]
 
 Registers
 R00:	4	-3	0	4	0	0	0	0
@@ -2776,13 +2776,13 @@ Post-MEM Queue:
 Pre-ALU2 Queue:
 	Entry 0:
 	Entry 1:
-Post-ALU2 Queue: [XORI R31, R0, #32769]
+Post-ALU2 Queue:
 
 Registers
 R00:	4	-3	0	4	0	0	0	0
 R08:	1	4	0	0	0	0	0	0
 R16:	0	0	0	0	0	0	0	0
-R24:	0	0	0	0	0	0	0	5
+R24:	0	0	0	0	0	0	0	32773
 
 Data
 452:	-1	-2	-3	1	2	4	-4	10
@@ -2795,17 +2795,17 @@ IF Unit:
 	Waiting Instruction:
 	Executed Instruction:
 Pre-Issue Queue:
-	Entry 0: [XORI R31, R1, #2]
-	Entry 1: [XORI R31, R8, #4]
-	Entry 2: [SRL R31, R1, #2]
-	Entry 3: [SRL R31, R2, #3]
+	Entry 0: [XORI R31, R8, #4]
+	Entry 1: [SRL R31, R1, #2]
+	Entry 2: [SRL R31, R2, #3]
+	Entry 3:
 Pre-ALU1 Queue:
 	Entry 0:
 	Entry 1:
 Pre-MEM Queue:
 Post-MEM Queue:
 Pre-ALU2 Queue:
-	Entry 0:
+	Entry 0: [XORI R31, R1, #2]
 	Entry 1:
 Post-ALU2 Queue:
 
@@ -2829,16 +2829,16 @@ Pre-Issue Queue:
 	Entry 0: [XORI R31, R8, #4]
 	Entry 1: [SRL R31, R1, #2]
 	Entry 2: [SRL R31, R2, #3]
-	Entry 3:
+	Entry 3: [SRL R31, R3, #4]
 Pre-ALU1 Queue:
 	Entry 0:
 	Entry 1:
 Pre-MEM Queue:
 Post-MEM Queue:
 Pre-ALU2 Queue:
-	Entry 0: [XORI R31, R1, #2]
+	Entry 0:
 	Entry 1:
-Post-ALU2 Queue:
+Post-ALU2 Queue: [XORI R31, R1, #2]
 
 Registers
 R00:	4	-3	0	4	0	0	0	0
@@ -2869,13 +2869,13 @@ Post-MEM Queue:
 Pre-ALU2 Queue:
 	Entry 0:
 	Entry 1:
-Post-ALU2 Queue: [XORI R31, R1, #2]
+Post-ALU2 Queue:
 
 Registers
 R00:	4	-3	0	4	0	0	0	0
 R08:	1	4	0	0	0	0	0	0
 R16:	0	0	0	0	0	0	0	0
-R24:	0	0	0	0	0	0	0	32773
+R24:	0	0	0	0	0	0	0	-1
 
 Data
 452:	-1	-2	-3	1	2	4	-4	10
@@ -2888,17 +2888,17 @@ IF Unit:
 	Waiting Instruction:
 	Executed Instruction:
 Pre-Issue Queue:
-	Entry 0: [XORI R31, R8, #4]
-	Entry 1: [SRL R31, R1, #2]
-	Entry 2: [SRL R31, R2, #3]
-	Entry 3: [SRL R31, R3, #4]
+	Entry 0: [SRL R31, R1, #2]
+	Entry 1: [SRL R31, R2, #3]
+	Entry 2: [SRL R31, R3, #4]
+	Entry 3:
 Pre-ALU1 Queue:
 	Entry 0:
 	Entry 1:
 Pre-MEM Queue:
 Post-MEM Queue:
 Pre-ALU2 Queue:
-	Entry 0:
+	Entry 0: [XORI R31, R8, #4]
 	Entry 1:
 Post-ALU2 Queue:
 
@@ -2922,16 +2922,16 @@ Pre-Issue Queue:
 	Entry 0: [SRL R31, R1, #2]
 	Entry 1: [SRL R31, R2, #3]
 	Entry 2: [SRL R31, R3, #4]
-	Entry 3:
+	Entry 3: [SRA R31, R1, #2]
 Pre-ALU1 Queue:
 	Entry 0:
 	Entry 1:
 Pre-MEM Queue:
 Post-MEM Queue:
 Pre-ALU2 Queue:
-	Entry 0: [XORI R31, R8, #4]
+	Entry 0:
 	Entry 1:
-Post-ALU2 Queue:
+Post-ALU2 Queue: [XORI R31, R8, #4]
 
 Registers
 R00:	4	-3	0	4	0	0	0	0
@@ -2962,13 +2962,13 @@ Post-MEM Queue:
 Pre-ALU2 Queue:
 	Entry 0:
 	Entry 1:
-Post-ALU2 Queue: [XORI R31, R8, #4]
+Post-ALU2 Queue:
 
 Registers
 R00:	4	-3	0	4	0	0	0	0
 R08:	1	4	0	0	0	0	0	0
 R16:	0	0	0	0	0	0	0	0
-R24:	0	0	0	0	0	0	0	-1
+R24:	0	0	0	0	0	0	0	5
 
 Data
 452:	-1	-2	-3	1	2	4	-4	10
@@ -2981,17 +2981,17 @@ IF Unit:
 	Waiting Instruction:
 	Executed Instruction:
 Pre-Issue Queue:
-	Entry 0: [SRL R31, R1, #2]
-	Entry 1: [SRL R31, R2, #3]
-	Entry 2: [SRL R31, R3, #4]
-	Entry 3: [SRA R31, R1, #2]
+	Entry 0: [SRL R31, R2, #3]
+	Entry 1: [SRL R31, R3, #4]
+	Entry 2: [SRA R31, R1, #2]
+	Entry 3:
 Pre-ALU1 Queue:
 	Entry 0:
 	Entry 1:
 Pre-MEM Queue:
 Post-MEM Queue:
 Pre-ALU2 Queue:
-	Entry 0:
+	Entry 0: [SRL R31, R1, #2]
 	Entry 1:
 Post-ALU2 Queue:
 
@@ -3015,16 +3015,16 @@ Pre-Issue Queue:
 	Entry 0: [SRL R31, R2, #3]
 	Entry 1: [SRL R31, R3, #4]
 	Entry 2: [SRA R31, R1, #2]
-	Entry 3:
+	Entry 3: [SRA R31, R2, #3]
 Pre-ALU1 Queue:
 	Entry 0:
 	Entry 1:
 Pre-MEM Queue:
 Post-MEM Queue:
 Pre-ALU2 Queue:
-	Entry 0: [SRL R31, R1, #2]
+	Entry 0:
 	Entry 1:
-Post-ALU2 Queue:
+Post-ALU2 Queue: [SRL R31, R1, #2]
 
 Registers
 R00:	4	-3	0	4	0	0	0	0
@@ -3055,13 +3055,13 @@ Post-MEM Queue:
 Pre-ALU2 Queue:
 	Entry 0:
 	Entry 1:
-Post-ALU2 Queue: [SRL R31, R1, #2]
+Post-ALU2 Queue:
 
 Registers
 R00:	4	-3	0	4	0	0	0	0
 R08:	1	4	0	0	0	0	0	0
 R16:	0	0	0	0	0	0	0	0
-R24:	0	0	0	0	0	0	0	5
+R24:	0	0	0	0	0	0	0	1073741823
 
 Data
 452:	-1	-2	-3	1	2	4	-4	10
@@ -3074,17 +3074,17 @@ IF Unit:
 	Waiting Instruction:
 	Executed Instruction:
 Pre-Issue Queue:
-	Entry 0: [SRL R31, R2, #3]
-	Entry 1: [SRL R31, R3, #4]
-	Entry 2: [SRA R31, R1, #2]
-	Entry 3: [SRA R31, R2, #3]
+	Entry 0: [SRL R31, R3, #4]
+	Entry 1: [SRA R31, R1, #2]
+	Entry 2: [SRA R31, R2, #3]
+	Entry 3:
 Pre-ALU1 Queue:
 	Entry 0:
 	Entry 1:
 Pre-MEM Queue:
 Post-MEM Queue:
 Pre-ALU2 Queue:
-	Entry 0:
+	Entry 0: [SRL R31, R2, #3]
 	Entry 1:
 Post-ALU2 Queue:
 
@@ -3108,16 +3108,16 @@ Pre-Issue Queue:
 	Entry 0: [SRL R31, R3, #4]
 	Entry 1: [SRA R31, R1, #2]
 	Entry 2: [SRA R31, R2, #3]
-	Entry 3:
+	Entry 3: [SRA R31, R3, #4]
 Pre-ALU1 Queue:
 	Entry 0:
 	Entry 1:
 Pre-MEM Queue:
 Post-MEM Queue:
 Pre-ALU2 Queue:
-	Entry 0: [SRL R31, R2, #3]
+	Entry 0:
 	Entry 1:
-Post-ALU2 Queue:
+Post-ALU2 Queue: [SRL R31, R2, #3]
 
 Registers
 R00:	4	-3	0	4	0	0	0	0
@@ -3148,37 +3148,6 @@ Post-MEM Queue:
 Pre-ALU2 Queue:
 	Entry 0:
 	Entry 1:
-Post-ALU2 Queue: [SRL R31, R2, #3]
-
-Registers
-R00:	4	-3	0	4	0	0	0	0
-R08:	1	4	0	0	0	0	0	0
-R16:	0	0	0	0	0	0	0	0
-R24:	0	0	0	0	0	0	0	1073741823
-
-Data
-452:	-1	-2	-3	1	2	4	-4	10
-484:	7	9	1	0	-1	1	-1	0
-516:	0	0	0	0	0	0	0	512
---------------------
-Cycle 103:
-
-IF Unit:
-	Waiting Instruction:
-	Executed Instruction:
-Pre-Issue Queue:
-	Entry 0: [SRL R31, R3, #4]
-	Entry 1: [SRA R31, R1, #2]
-	Entry 2: [SRA R31, R2, #3]
-	Entry 3: [SRA R31, R3, #4]
-Pre-ALU1 Queue:
-	Entry 0:
-	Entry 1:
-Pre-MEM Queue:
-Post-MEM Queue:
-Pre-ALU2 Queue:
-	Entry 0:
-	Entry 1:
 Post-ALU2 Queue:
 
 Registers
@@ -3192,7 +3161,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 104:
+Cycle 103:
 
 IF Unit:
 	Waiting Instruction:
@@ -3223,7 +3192,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 105:
+Cycle 104:
 
 IF Unit:
 	Waiting Instruction:
@@ -3254,7 +3223,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 106:
+Cycle 105:
 
 IF Unit:
 	Waiting Instruction:
@@ -3285,7 +3254,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 107:
+Cycle 106:
 
 IF Unit:
 	Waiting Instruction: [BEQ R28, R30, #12]
@@ -3316,7 +3285,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 108:
+Cycle 107:
 
 IF Unit:
 	Waiting Instruction: [BEQ R28, R30, #12]
@@ -3347,7 +3316,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 109:
+Cycle 108:
 
 IF Unit:
 	Waiting Instruction:
@@ -3378,7 +3347,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 110:
+Cycle 109:
 
 IF Unit:
 	Waiting Instruction:
@@ -3409,7 +3378,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 111:
+Cycle 110:
 
 IF Unit:
 	Waiting Instruction:
@@ -3440,7 +3409,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 112:
+Cycle 111:
 
 IF Unit:
 	Waiting Instruction:
@@ -3471,7 +3440,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 113:
+Cycle 112:
 
 IF Unit:
 	Waiting Instruction:
@@ -3502,7 +3471,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 114:
+Cycle 113:
 
 IF Unit:
 	Waiting Instruction:
@@ -3533,7 +3502,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 115:
+Cycle 114:
 
 IF Unit:
 	Waiting Instruction:
@@ -3564,7 +3533,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 116:
+Cycle 115:
 
 IF Unit:
 	Waiting Instruction:
@@ -3595,7 +3564,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 117:
+Cycle 116:
 
 IF Unit:
 	Waiting Instruction:
@@ -3626,7 +3595,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 118:
+Cycle 117:
 
 IF Unit:
 	Waiting Instruction:
@@ -3657,7 +3626,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 119:
+Cycle 118:
 
 IF Unit:
 	Waiting Instruction:
@@ -3688,7 +3657,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 120:
+Cycle 119:
 
 IF Unit:
 	Waiting Instruction:
@@ -3719,7 +3688,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 121:
+Cycle 120:
 
 IF Unit:
 	Waiting Instruction:
@@ -3750,7 +3719,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 122:
+Cycle 121:
 
 IF Unit:
 	Waiting Instruction:
@@ -3781,7 +3750,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 123:
+Cycle 122:
 
 IF Unit:
 	Waiting Instruction:
@@ -3812,7 +3781,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 124:
+Cycle 123:
 
 IF Unit:
 	Waiting Instruction:
@@ -3843,7 +3812,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 125:
+Cycle 124:
 
 IF Unit:
 	Waiting Instruction:
@@ -3874,7 +3843,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 126:
+Cycle 125:
 
 IF Unit:
 	Waiting Instruction:
@@ -3905,7 +3874,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 127:
+Cycle 126:
 
 IF Unit:
 	Waiting Instruction:
@@ -3936,7 +3905,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 128:
+Cycle 127:
 
 IF Unit:
 	Waiting Instruction:
@@ -3967,7 +3936,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 129:
+Cycle 128:
 
 IF Unit:
 	Waiting Instruction:
@@ -3998,7 +3967,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 130:
+Cycle 129:
 
 IF Unit:
 	Waiting Instruction:
@@ -4029,7 +3998,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 131:
+Cycle 130:
 
 IF Unit:
 	Waiting Instruction:
@@ -4060,7 +4029,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 132:
+Cycle 131:
 
 IF Unit:
 	Waiting Instruction:
@@ -4091,7 +4060,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 133:
+Cycle 132:
 
 IF Unit:
 	Waiting Instruction:
@@ -4122,7 +4091,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 134:
+Cycle 133:
 
 IF Unit:
 	Waiting Instruction:
@@ -4153,7 +4122,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 135:
+Cycle 134:
 
 IF Unit:
 	Waiting Instruction:
@@ -4184,7 +4153,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 136:
+Cycle 135:
 
 IF Unit:
 	Waiting Instruction:
@@ -4215,7 +4184,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 137:
+Cycle 136:
 
 IF Unit:
 	Waiting Instruction:
@@ -4246,7 +4215,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 138:
+Cycle 137:
 
 IF Unit:
 	Waiting Instruction:
@@ -4277,7 +4246,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 139:
+Cycle 138:
 
 IF Unit:
 	Waiting Instruction:
@@ -4308,7 +4277,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 140:
+Cycle 139:
 
 IF Unit:
 	Waiting Instruction:
@@ -4339,7 +4308,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 141:
+Cycle 140:
 
 IF Unit:
 	Waiting Instruction:
@@ -4370,7 +4339,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 142:
+Cycle 141:
 
 IF Unit:
 	Waiting Instruction:
@@ -4401,7 +4370,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 143:
+Cycle 142:
 
 IF Unit:
 	Waiting Instruction:
@@ -4432,7 +4401,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 144:
+Cycle 143:
 
 IF Unit:
 	Waiting Instruction:
@@ -4463,7 +4432,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 145:
+Cycle 144:
 
 IF Unit:
 	Waiting Instruction:
@@ -4494,7 +4463,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 146:
+Cycle 145:
 
 IF Unit:
 	Waiting Instruction:
@@ -4525,7 +4494,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 147:
+Cycle 146:
 
 IF Unit:
 	Waiting Instruction:
@@ -4556,7 +4525,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 148:
+Cycle 147:
 
 IF Unit:
 	Waiting Instruction:
@@ -4587,7 +4556,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 149:
+Cycle 148:
 
 IF Unit:
 	Waiting Instruction:
@@ -4618,7 +4587,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 150:
+Cycle 149:
 
 IF Unit:
 	Waiting Instruction:
@@ -4649,7 +4618,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 151:
+Cycle 150:
 
 IF Unit:
 	Waiting Instruction:
@@ -4680,7 +4649,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 152:
+Cycle 151:
 
 IF Unit:
 	Waiting Instruction:
@@ -4711,7 +4680,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 153:
+Cycle 152:
 
 IF Unit:
 	Waiting Instruction:
@@ -4742,7 +4711,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 154:
+Cycle 153:
 
 IF Unit:
 	Waiting Instruction:
@@ -4773,7 +4742,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 155:
+Cycle 154:
 
 IF Unit:
 	Waiting Instruction:
@@ -4804,7 +4773,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 156:
+Cycle 155:
 
 IF Unit:
 	Waiting Instruction:
@@ -4835,7 +4804,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 157:
+Cycle 156:
 
 IF Unit:
 	Waiting Instruction:
@@ -4866,7 +4835,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 158:
+Cycle 157:
 
 IF Unit:
 	Waiting Instruction:
@@ -4897,7 +4866,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 159:
+Cycle 158:
 
 IF Unit:
 	Waiting Instruction:
@@ -4928,7 +4897,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 160:
+Cycle 159:
 
 IF Unit:
 	Waiting Instruction:
@@ -4959,7 +4928,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 161:
+Cycle 160:
 
 IF Unit:
 	Waiting Instruction:
@@ -4990,7 +4959,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 162:
+Cycle 161:
 
 IF Unit:
 	Waiting Instruction:
@@ -5021,7 +4990,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 163:
+Cycle 162:
 
 IF Unit:
 	Waiting Instruction:
@@ -5052,7 +5021,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 164:
+Cycle 163:
 
 IF Unit:
 	Waiting Instruction:
@@ -5083,7 +5052,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 165:
+Cycle 164:
 
 IF Unit:
 	Waiting Instruction:
@@ -5114,7 +5083,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 166:
+Cycle 165:
 
 IF Unit:
 	Waiting Instruction:
@@ -5145,7 +5114,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 167:
+Cycle 166:
 
 IF Unit:
 	Waiting Instruction:
@@ -5176,7 +5145,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 168:
+Cycle 167:
 
 IF Unit:
 	Waiting Instruction:
@@ -5207,7 +5176,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 169:
+Cycle 168:
 
 IF Unit:
 	Waiting Instruction:
@@ -5238,7 +5207,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 170:
+Cycle 169:
 
 IF Unit:
 	Waiting Instruction:
@@ -5269,7 +5238,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 171:
+Cycle 170:
 
 IF Unit:
 	Waiting Instruction:
@@ -5300,7 +5269,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 172:
+Cycle 171:
 
 IF Unit:
 	Waiting Instruction:
@@ -5331,7 +5300,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 173:
+Cycle 172:
 
 IF Unit:
 	Waiting Instruction:
@@ -5362,7 +5331,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 174:
+Cycle 173:
 
 IF Unit:
 	Waiting Instruction:
@@ -5393,7 +5362,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 175:
+Cycle 174:
 
 IF Unit:
 	Waiting Instruction:
@@ -5424,7 +5393,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 176:
+Cycle 175:
 
 IF Unit:
 	Waiting Instruction:
@@ -5455,7 +5424,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 177:
+Cycle 176:
 
 IF Unit:
 	Waiting Instruction:
@@ -5486,7 +5455,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 178:
+Cycle 177:
 
 IF Unit:
 	Waiting Instruction:
@@ -5517,7 +5486,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 179:
+Cycle 178:
 
 IF Unit:
 	Waiting Instruction:
@@ -5548,7 +5517,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 180:
+Cycle 179:
 
 IF Unit:
 	Waiting Instruction:
@@ -5579,7 +5548,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 181:
+Cycle 180:
 
 IF Unit:
 	Waiting Instruction:
@@ -5610,7 +5579,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 182:
+Cycle 181:
 
 IF Unit:
 	Waiting Instruction:
@@ -5641,7 +5610,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 183:
+Cycle 182:
 
 IF Unit:
 	Waiting Instruction:
@@ -5672,7 +5641,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 184:
+Cycle 183:
 
 IF Unit:
 	Waiting Instruction:
@@ -5703,7 +5672,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 185:
+Cycle 184:
 
 IF Unit:
 	Waiting Instruction:
@@ -5734,7 +5703,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 186:
+Cycle 185:
 
 IF Unit:
 	Waiting Instruction:
@@ -5765,7 +5734,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 187:
+Cycle 186:
 
 IF Unit:
 	Waiting Instruction:
@@ -5796,7 +5765,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 188:
+Cycle 187:
 
 IF Unit:
 	Waiting Instruction:
@@ -5827,7 +5796,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 189:
+Cycle 188:
 
 IF Unit:
 	Waiting Instruction:
@@ -5858,7 +5827,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 190:
+Cycle 189:
 
 IF Unit:
 	Waiting Instruction:
@@ -5889,7 +5858,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 191:
+Cycle 190:
 
 IF Unit:
 	Waiting Instruction:
@@ -5920,7 +5889,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 192:
+Cycle 191:
 
 IF Unit:
 	Waiting Instruction:
@@ -5951,7 +5920,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 193:
+Cycle 192:
 
 IF Unit:
 	Waiting Instruction:
@@ -5982,7 +5951,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 194:
+Cycle 193:
 
 IF Unit:
 	Waiting Instruction:
@@ -6013,7 +5982,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 195:
+Cycle 194:
 
 IF Unit:
 	Waiting Instruction:
@@ -6044,7 +6013,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 196:
+Cycle 195:
 
 IF Unit:
 	Waiting Instruction:
@@ -6075,38 +6044,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 197:
-
-IF Unit:
-	Waiting Instruction:
-	Executed Instruction: [NOP]
-Pre-Issue Queue:
-	Entry 0: [XORI R31, R0, #32769]
-	Entry 1: [XORI R31, R1, #2]
-	Entry 2: [XORI R31, R8, #4]
-	Entry 3: [SRL R31, R1, #2]
-Pre-ALU1 Queue:
-	Entry 0:
-	Entry 1:
-Pre-MEM Queue:
-Post-MEM Queue:
-Pre-ALU2 Queue:
-	Entry 0:
-	Entry 1:
-Post-ALU2 Queue: [ORI R31, R8, #4]
-
-Registers
-R00:	4	-3	0	4	0	0	0	0
-R08:	1	4	0	0	0	0	0	0
-R16:	0	0	0	0	0	0	0	0
-R24:	0	0	0	0	256	0	256	-1
-
-Data
-452:	-1	-2	-3	1	2	4	-4	10
-484:	7	9	1	0	-1	1	-1	0
-516:	0	0	0	0	0	0	0	512
---------------------
-Cycle 198:
+Cycle 196:
 
 IF Unit:
 	Waiting Instruction:
@@ -6115,7 +6053,7 @@ Pre-Issue Queue:
 	Entry 0: [XORI R31, R0, #32769]
 	Entry 1: [XORI R31, R1, #2]
 	Entry 2: [XORI R31, R8, #4]
-	Entry 3: [SRL R31, R1, #2]
+	Entry 3:
 Pre-ALU1 Queue:
 	Entry 0:
 	Entry 1:
@@ -6137,7 +6075,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 199:
+Cycle 197:
 
 IF Unit:
 	Waiting Instruction:
@@ -6168,7 +6106,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 200:
+Cycle 198:
 
 IF Unit:
 	Waiting Instruction:
@@ -6199,7 +6137,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 201:
+Cycle 199:
 
 IF Unit:
 	Waiting Instruction:
@@ -6230,7 +6168,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 202:
+Cycle 200:
 
 IF Unit:
 	Waiting Instruction:
@@ -6261,7 +6199,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 203:
+Cycle 201:
 
 IF Unit:
 	Waiting Instruction:
@@ -6292,7 +6230,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 204:
+Cycle 202:
 
 IF Unit:
 	Waiting Instruction:
@@ -6323,7 +6261,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 205:
+Cycle 203:
 
 IF Unit:
 	Waiting Instruction:
@@ -6354,7 +6292,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 206:
+Cycle 204:
 
 IF Unit:
 	Waiting Instruction:
@@ -6385,7 +6323,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 207:
+Cycle 205:
 
 IF Unit:
 	Waiting Instruction:
@@ -6416,7 +6354,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 208:
+Cycle 206:
 
 IF Unit:
 	Waiting Instruction:
@@ -6447,7 +6385,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 209:
+Cycle 207:
 
 IF Unit:
 	Waiting Instruction:
@@ -6478,7 +6416,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 210:
+Cycle 208:
 
 IF Unit:
 	Waiting Instruction:
@@ -6509,7 +6447,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 211:
+Cycle 209:
 
 IF Unit:
 	Waiting Instruction:
@@ -6540,7 +6478,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 212:
+Cycle 210:
 
 IF Unit:
 	Waiting Instruction:
@@ -6571,7 +6509,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 213:
+Cycle 211:
 
 IF Unit:
 	Waiting Instruction:
@@ -6602,7 +6540,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 214:
+Cycle 212:
 
 IF Unit:
 	Waiting Instruction:
@@ -6633,7 +6571,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 215:
+Cycle 213:
 
 IF Unit:
 	Waiting Instruction:
@@ -6664,7 +6602,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 216:
+Cycle 214:
 
 IF Unit:
 	Waiting Instruction:
@@ -6695,7 +6633,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 217:
+Cycle 215:
 
 IF Unit:
 	Waiting Instruction:
@@ -6726,7 +6664,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 218:
+Cycle 216:
 
 IF Unit:
 	Waiting Instruction: [BEQ R28, R30, #12]
@@ -6757,7 +6695,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 219:
+Cycle 217:
 
 IF Unit:
 	Waiting Instruction: [BEQ R28, R30, #12]
@@ -6788,7 +6726,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 220:
+Cycle 218:
 
 IF Unit:
 	Waiting Instruction:
@@ -6819,7 +6757,7 @@ Data
 484:	7	9	1	0	-1	1	-1	0
 516:	0	0	0	0	0	0	0	512
 --------------------
-Cycle 221:
+Cycle 219:
 
 IF Unit:
 	Waiting Instruction:

@@ -183,10 +183,10 @@ Cycle 7:
 
 IF Unit:
 	Waiting Instruction:
-	Executed Instruction: [NOP]
+	Executed Instruction:
 Pre-Issue Queue:
 	Entry 0: [SLL R16, R1, #2]
-	Entry 1: [LW R3, 304(R16)]
+	Entry 1:
 	Entry 2:
 	Entry 3:
 Pre-ALU1 Queue:
@@ -215,8 +215,8 @@ IF Unit:
 	Waiting Instruction:
 	Executed Instruction:
 Pre-Issue Queue:
-	Entry 0: [SLL R16, R1, #2]
-	Entry 1: [LW R3, 304(R16)]
+	Entry 0: [LW R3, 304(R16)]
+	Entry 1: [LW R4, 324(R16)]
 	Entry 2:
 	Entry 3:
 Pre-ALU1 Queue:
@@ -225,7 +225,7 @@ Pre-ALU1 Queue:
 Pre-MEM Queue:
 Post-MEM Queue:
 Pre-ALU2 Queue:
-	Entry 0:
+	Entry 0: [SLL R16, R1, #2]
 	Entry 1:
 Post-ALU2 Queue:
 
@@ -248,16 +248,16 @@ Pre-Issue Queue:
 	Entry 0: [LW R3, 304(R16)]
 	Entry 1: [LW R4, 324(R16)]
 	Entry 2: [ADD R5, R3, R4]
-	Entry 3:
+	Entry 3: [SW R5, 344(R16)]
 Pre-ALU1 Queue:
 	Entry 0:
 	Entry 1:
 Pre-MEM Queue:
 Post-MEM Queue:
 Pre-ALU2 Queue:
-	Entry 0: [SLL R16, R1, #2]
+	Entry 0:
 	Entry 1:
-Post-ALU2 Queue:
+Post-ALU2 Queue: [SLL R16, R1, #2]
 
 Registers
 R00:	0	0	2	0	0	0	0	0
@@ -287,36 +287,6 @@ Post-MEM Queue:
 Pre-ALU2 Queue:
 	Entry 0:
 	Entry 1:
-Post-ALU2 Queue: [SLL R16, R1, #2]
-
-Registers
-R00:	0	0	2	0	0	0	0	0
-R08:	0	0	0	0	0	0	0	0
-R16:	0	0	0	0	0	0	0	0
-R24:	0	0	0	0	0	0	0	0
-
-Data
-304:	-1	-2	-3	1	2	4	-4	10
-336:	7	9	1	0	-1	1	-1	0
---------------------
-Cycle 11:
-
-IF Unit:
-	Waiting Instruction:
-	Executed Instruction:
-Pre-Issue Queue:
-	Entry 0: [LW R3, 304(R16)]
-	Entry 1: [LW R4, 324(R16)]
-	Entry 2: [ADD R5, R3, R4]
-	Entry 3: [SW R5, 344(R16)]
-Pre-ALU1 Queue:
-	Entry 0:
-	Entry 1:
-Pre-MEM Queue:
-Post-MEM Queue:
-Pre-ALU2 Queue:
-	Entry 0:
-	Entry 1:
 Post-ALU2 Queue:
 
 Registers
@@ -329,7 +299,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	1	0	-1	1	-1	0
 --------------------
-Cycle 12:
+Cycle 11:
 
 IF Unit:
 	Waiting Instruction:
@@ -359,7 +329,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	1	0	-1	1	-1	0
 --------------------
-Cycle 13:
+Cycle 12:
 
 IF Unit:
 	Waiting Instruction:
@@ -389,7 +359,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	1	0	-1	1	-1	0
 --------------------
-Cycle 14:
+Cycle 13:
 
 IF Unit:
 	Waiting Instruction:
@@ -419,7 +389,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	1	0	-1	1	-1	0
 --------------------
-Cycle 15:
+Cycle 14:
 
 IF Unit:
 	Waiting Instruction: [BEQ R1, R2, #32]
@@ -449,7 +419,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	1	0	-1	1	-1	0
 --------------------
-Cycle 16:
+Cycle 15:
 
 IF Unit:
 	Waiting Instruction: [BEQ R1, R2, #32]
@@ -479,7 +449,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	1	0	-1	1	-1	0
 --------------------
-Cycle 17:
+Cycle 16:
 
 IF Unit:
 	Waiting Instruction:
@@ -509,37 +479,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	1	0	-1	1	-1	0
 --------------------
-Cycle 18:
-
-IF Unit:
-	Waiting Instruction:
-	Executed Instruction: [NOP]
-Pre-Issue Queue:
-	Entry 0: [SW R5, 344(R16)]
-	Entry 1: [SLL R16, R1, #2]
-	Entry 2: [LW R3, 304(R16)]
-	Entry 3:
-Pre-ALU1 Queue:
-	Entry 0:
-	Entry 1:
-Pre-MEM Queue:
-Post-MEM Queue:
-Pre-ALU2 Queue:
-	Entry 0:
-	Entry 1:
-Post-ALU2 Queue: [ADD R5, R3, R4]
-
-Registers
-R00:	0	1	2	-1	4	0	0	0
-R08:	0	0	0	0	0	0	0	0
-R16:	0	0	0	0	0	0	0	0
-R24:	0	0	0	0	0	0	0	0
-
-Data
-304:	-1	-2	-3	1	2	4	-4	10
-336:	7	9	1	0	-1	1	-1	0
---------------------
-Cycle 19:
+Cycle 17:
 
 IF Unit:
 	Waiting Instruction:
@@ -547,7 +487,7 @@ IF Unit:
 Pre-Issue Queue:
 	Entry 0: [SW R5, 344(R16)]
 	Entry 1: [SLL R16, R1, #2]
-	Entry 2: [LW R3, 304(R16)]
+	Entry 2:
 	Entry 3:
 Pre-ALU1 Queue:
 	Entry 0:
@@ -569,7 +509,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	1	0	-1	1	-1	0
 --------------------
-Cycle 20:
+Cycle 18:
 
 IF Unit:
 	Waiting Instruction:
@@ -599,7 +539,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	1	0	-1	1	-1	0
 --------------------
-Cycle 21:
+Cycle 19:
 
 IF Unit:
 	Waiting Instruction:
@@ -629,7 +569,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	1	0	-1	1	-1	0
 --------------------
-Cycle 22:
+Cycle 20:
 
 IF Unit:
 	Waiting Instruction:
@@ -659,7 +599,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	1	0	-1	1	-1	0
 --------------------
-Cycle 23:
+Cycle 21:
 
 IF Unit:
 	Waiting Instruction:
@@ -689,7 +629,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	3	0	-1	1	-1	0
 --------------------
-Cycle 24:
+Cycle 22:
 
 IF Unit:
 	Waiting Instruction:
@@ -719,7 +659,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	3	0	-1	1	-1	0
 --------------------
-Cycle 25:
+Cycle 23:
 
 IF Unit:
 	Waiting Instruction:
@@ -749,7 +689,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	3	0	-1	1	-1	0
 --------------------
-Cycle 26:
+Cycle 24:
 
 IF Unit:
 	Waiting Instruction:
@@ -779,7 +719,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	3	0	-1	1	-1	0
 --------------------
-Cycle 27:
+Cycle 25:
 
 IF Unit:
 	Waiting Instruction:
@@ -809,7 +749,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	3	0	-1	1	-1	0
 --------------------
-Cycle 28:
+Cycle 26:
 
 IF Unit:
 	Waiting Instruction: [BEQ R1, R2, #32]
@@ -839,7 +779,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	3	0	-1	1	-1	0
 --------------------
-Cycle 29:
+Cycle 27:
 
 IF Unit:
 	Waiting Instruction: [BEQ R1, R2, #32]
@@ -869,7 +809,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	3	0	-1	1	-1	0
 --------------------
-Cycle 30:
+Cycle 28:
 
 IF Unit:
 	Waiting Instruction:
@@ -899,7 +839,7 @@ Data
 304:	-1	-2	-3	1	2	4	-4	10
 336:	7	9	3	0	-1	1	-1	0
 --------------------
-Cycle 31:
+Cycle 29:
 
 IF Unit:
 	Waiting Instruction:
